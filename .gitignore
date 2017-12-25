@@ -5,3 +5,5 @@
 
 *.command
 
+*.rds
+*.rds.gz
