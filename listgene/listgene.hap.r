@@ -1,10 +1,5 @@
 library(readr)
 
-#in cell atlas
-membrane <- rbind(plasma,celljunc)%>%
-  unique()
-
-
 #in protein classes
 protein_class_predicted <- read_tsv("./HPA/protein_class_Predicted.tsv.gz")
 
@@ -25,5 +20,5 @@ protein.1 %>%
   rbind(protein.plmembrn)->protein.m
 
 write_tsv(protein.m,"./genelist_hap.tsv")
-write_tsv(membrane,"./genelist_hap.ca.tsv")
+
  
