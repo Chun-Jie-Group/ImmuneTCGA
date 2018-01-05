@@ -10,29 +10,53 @@ pro_class%>%
   rbind(filter(pro_class,is.na(`Subcellular location`)))->pro_sub.plasm.in
 
 #reliable
-pro_class %>%
-  filter(`Reliability (IH)`=="Uncertain"|`Reliability (Mouse Brain)`=="Uncertain"|`Reliability (IF)`=="Uncertain")->pro_uncertain
+#pro_class %>%
+ # filter(`Reliability (IH)`=="Uncertain"|`Reliability (Mouse Brain)`=="Uncertain"|`Reliability (IF)`=="Uncertain")->pro_uncertain
 
 pro_sub.plasm.in %>%
-  filter(Evidence=="Evidence at protein level",!is.na(Antibody))%>%
-  anti_join(pro_uncertain)->pro_reliable
+  filter(Evidence=="Evidence at protein level",!is.na(Antibody))->pro_reliable
 
-#empirical
 
-pro_reliable %>%
-  filter(grepl("ATP",`Gene description`))->pro_atp.related
-pro_reliable %>%
-  filter(grepl("Carbonic",`Gene description`))->pro_c.related
-pro_reliable %>%
-  filter(grepl("Calcium",`Gene description`))->pro_ca.related
+#locate by cell organs
+cell_plasma <- read_tsv("./subcell_location_Plasma.tsv.gz")
+cell_junc <- read_tsv("./subcell_location_Cell.tsv.gz")
+pro_subcell <- cell_junc%>%
+  rbind(cell_plasma)%>%
+  unique()
+
+membrane.protein.hpa <- pro_reliable%>%
+  rbind(pro_subcell)%>%
+  unique()
+
+
+
+memb.1 <- pro_reliable%>%
+  anti_join(pro_subcell)%>%
+  count(`Subcellular location`)
+  #filter(grepl("Predicted membrane proteins",`Protein class`))
+
+memb.2 <- pro_subcell %>%
+  anti_join(pro_reliable)%>%
+  filter(grepl("Predicted membrane proteins",`Protein class`))
+  
+
+
+
+#test dataset
+pro_subcell%>%
+  filter(Gene=="ADGRE2")
 pro_reliable%>%
-  filter(grepl("channel",`Gene description`))->pro_channel.rela
-pro_reliable%>%
-  filter(grepl("kinase",`Gene description`))->pro_kinase.rela
+  filter(Gene=="ADGRE2")
 
+membrane.protein.hpa%>%
+  filter(Gene=="CD44")
 
+pro_class%>%
+  filter(Gene=="ADGRE2")->test
 
+genelist.membrane%>%
+  filter(Gene=="ADGRE2")
 
 #car-T target&camcidate
-Car_t <- c("CD19","CLEC12A","CD44","CLEC12A","FOLR2","FUT3","CD33","CCR1","CD70","LILRB4","ADGRE2","LILRA2")
+#Car_t <- c("CD19","CLEC12A","CD44","CLEC12A","FOLR2","FUT3","CD33","CCR1","CD70","LILRB4","ADGRE2","LILRA2")
 
