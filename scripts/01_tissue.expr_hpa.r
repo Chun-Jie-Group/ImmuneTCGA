@@ -130,7 +130,6 @@ for(i in 1:nrow(diffgene)){
 }
 
 #--hpm-----------------------------------------------------
-
 diffgene%>%
-  filter(target==1)%>%
-  count(cancer_types)
+  filter(target==1)->selected
+
