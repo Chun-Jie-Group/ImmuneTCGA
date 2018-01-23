@@ -126,6 +126,8 @@ casp%>%
 #-----------------------------
 
 casp%>%
+  filter(level.HPA=="High")->casp_01
+casp_01%>%
   count(cancer_types)
 readr::write_tsv(casp,
                  file.path(out_path,"3.0_tissue.specifi_hpa.tsv"))
