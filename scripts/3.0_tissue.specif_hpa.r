@@ -1,7 +1,28 @@
+#start--------------
+rm(list=ls())
+#---------------------
 
+#path-----------------------------
 out_path <- "/data/fux/github/ImmuneTCGA/expression_analys"
-cancer_tissue <- readxl::read_xlsx("/data/fux/github/ImmuneTCGA/expression_analys/cancer_tissue.xlsx")
+diff_path <- "/data/fux/github/ImmuneTCGA/diff_expr"
 
+#infile----------------
+
+expr_hpa <- readr::read_tsv(file.path(out_path,"HPA_tissue.fixed.tsv"))  
+cancer_tissue <- readxl::read_xlsx("/data/fux/github/ImmuneTCGA/expression_analys/cancer_tissue.xlsx")
+cancer_tissue[2,2] <- "skin"
+gene_fc_pvalue_filter <- readr::read_tsv(file.path(diff_path,"tsv_gene_fc_pvalue_filter.tsv"))
+HK_genes <- readr::read_tsv(file.path(out_path,"HK_genes.txt"),col_names = F)
+    colnames(HK_genes) <- c("symbol","entriz_id")
+  
+ 
+#filte out Housekeeper Genes-------------------------------------------------------------------------
+HK_diffgene <- gene_fc_pvalue_filter%>%
+  filter(symbol %in% HK_genes$symbol)
+
+diffgene <- gene_fc_pvalue_filter%>%
+  anti_join(HK_diffgene)
+  
 #-------------------------------------------
 
 tissue_group <- function(expres,symbol){
@@ -51,6 +72,8 @@ tissue_group <- function(expres,symbol){
 
 tissue_specif <- function(can){
   
+  can <- "HNSC"
+  
   cancer_tissue%>%
     filter(cancer_type==can)->cancer_tissue_00
   
@@ -62,6 +85,7 @@ tissue_specif <- function(can){
            `Gene name` %in% diffgene.cancer.spe$symbol,
            Level=="High"|Level=="Medium")->expr.hpa
   
+  
  if(nrow(expr.hpa)==0){
    return(0)
    }
@@ -70,6 +94,7 @@ tissue_specif <- function(can){
   
   can_info <- data.frame(gene=unique(expr.hpa$`Gene name`),
                          level.HPA=character(n.gene),Ratio.HPA=numeric(n.gene),
+                         OtherL.H=character(n.gene),
                          stringsAsFactors = F)
   
   for (i in 1:nrow(can_info)) {
@@ -77,7 +102,9 @@ tissue_specif <- function(can){
     can_info[i,2] <- casp_selec$Level
     gene_expr <- tissue_group(expr_hpa,can_info[i,1])
     can_info[i,3] <- (sum(gene_expr$Level=="High")+sum(gene_expr$Level=="Medium"))/nrow(gene_expr)
-    
+    gene_expr <- gene_expr%>%
+      filter(Tissue!=casp_selec$Tissue)
+    can_info[i,4] <- ifelse("High" %in% gene_expr$Level,"yes","no")
   }
   
   diffgene%>%
@@ -123,11 +150,15 @@ casp%>%
   rbind(casp.prad)%>%
   rbind(casp.stad)%>%
   rbind(casp.thca)->casp   
+
+casp <- casp%>%
+  filter(OtherL.H=="no")
 #-----------------------------
 
 casp%>%
   filter(level.HPA=="High")->casp_01
 casp_01%>%
   count(cancer_types)
-readr::write_tsv(casp,
-                 file.path(out_path,"3.0_tissue.specifi_hpa.tsv"))
+ 
+xlsx::write.xlsx(casp,file.path(out_path,"3.0_tissue.specifi_hpa.xlsx"))
+readr::write_tsv(casp,file.path(out_path,"01_casp.tsv"))
