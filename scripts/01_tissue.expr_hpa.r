@@ -79,7 +79,9 @@ expr_hpa$Tissue %>%
   str_replace_all("uterus 2","uterus")%>%
   
   str_replace_all("lactating breast","breast")->expr_hpa$Tissue
-  
+
+#------------------
+readr::write_tsv(expr_hpa,file.path(out_path,"HPA_tissue.fixed.tsv"))
 #---------------------------------------------------------
 
 tissue_nomen%>%
