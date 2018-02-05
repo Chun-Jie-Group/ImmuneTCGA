@@ -1,17 +1,16 @@
 
 library(dplyr)
 #path--------------------
+
 expr_path <- "/data/TCGA/TCGA_data"
 out_path <- "/data/fux/github/ImmuneTCGA/expression_analys/tissue.specif.tcga"
 diff_path <- "/data/fux/github/ImmuneTCGA/diff_expr"
 expr.analy_path <- "/data/fux/github/ImmuneTCGA/expression_analys"
 
 #infile--------------------------
+
 expr <- readr::read_rds(file.path(expr_path, "pancan33_expr.rds.gz"))
 gene_list <- readr::read_tsv(file.path(diff_path,"tsv_gene_fc_pvalue_filter.tsv"))
-
-
-casp <- readr::read_tsv()
 
 # filter out genes ---------------
 filter_gene_list <- function(.x, gene_list) {
