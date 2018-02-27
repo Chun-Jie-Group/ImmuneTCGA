@@ -1,7 +1,7 @@
 rm(list=ls())
 
 #Lib--------------------------------------------------------------------
-
+library(dplyr)
 #Path-------------------------------------------------------------------
 
 GTEx_path <- "/data/GTEx/V7"
@@ -87,10 +87,12 @@ for (i in 2:nrow(GTEx_expr)) {
 
 #Test------------------------------------------------------------------
 
-GTEx_matrix %>%
-  filter(symbol=="IL3RA")
+#GTEx_matrix %>%
+ # filter(symbol=="IL3RA")
   
 #Write---------------------------------------------------------------
-
-readr::write_tsv(GTEx_matrix,
-                 file.path(out_path,"GTEx_matrix_01.txv"))
+row.names(GTEx_matrix) <- GTEx_matrix$symbol
+GTEx_matrix <- GTEx_matrix %>%
+  select(-1)
+write.table(GTEx_matrix,
+                 file.path(out_path,"GTEx_matrix_02.tsv"))
